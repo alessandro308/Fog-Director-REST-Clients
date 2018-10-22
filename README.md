@@ -1,8 +1,10 @@
 # Fog Director RESTful API
 
+<img src="https://www.cisco.com/content/dam/assets/prod/im/img/600/fog-director-600x400.jpg" width="500px">
+
 CISCO Fog Director delivers the capability to manage large-scale production deployments of IOx-enabled fog applications. 
 
-The RESTful API official documentation is [https://developer.cisco.com/docs/iox/#!fog-director-api-documentation/cisco-fog-director-rest-api](here) but it appears incomplete if compared with the example provided in the [https://github.com/CiscoIOx/Fog-Director-REST-Clients](CiscoIOX REST Clients GitHub Repository).
+The RESTful API official documentation is [here](https://developer.cisco.com/docs/iox/#!fog-director-api-documentation/cisco-fog-director-rest-api) but it appears incomplete if compared with the example provided in the CiscoIOX REST Clients [GitHub Repository](https://github.com/CiscoIOx/Fog-Director-REST-Clients).
 
 This fork tries to give to this API a better (and complete) documentation merging the official documentation with the unknown API found in the examples.
 
