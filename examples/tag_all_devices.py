@@ -43,15 +43,26 @@ def get_token(ip,username,password):
         print r.text
     return(token)
 
-def tag_all_devices(ip,token):
+def create_tag(ip, token, tag_name):
+    tag_url="https://%s/api/v1/appmgr/tags" % ip
+    headers = {'x-token-id':token,'content-type': 'application/json'}
+    data = {'name':tag_name}
+    r = requests.post(tag_url,data=json.dumps(data),headers=headers,verify=False)
+    tags=json.loads((json.dumps(r.json())))
+    return tags
+
+def tag_device(ip, token, deviceid, tag):
+    tag_device_url="https://%s/api/v1/appmgr/tags/%s/devices" % (ip,str(tagid))
+    headers = {'x-token-id':token,'content-type': 'application/json'}
+    data = {'devices':[deviceid]}
+    r = requests.post(tag_device_url,data=json.dumps(data),headers=headers,verify=False)
+    return r.status_code
+
+def tag_all_devices(ip,token, tag):
     print("=====================")
     print("step1:creating a tag first")
     print("====================")
-    tag_url="https://%s/api/v1/appmgr/tags" % ip
-    headers = {'x-token-id':token,'content-type': 'application/json'}
-    data = {'name':'withtag'}
-    r = requests.post(tag_url,data=json.dumps(data),headers=headers,verify=False)
-    tags=json.loads((json.dumps(r.json())))
+    tags = create_tag(ip, token, tag_name)
     print(tags)
     print(r.status_code)
     tagid=tags['tagId']
@@ -69,11 +80,7 @@ def tag_all_devices(ip,token):
     for index in range(len(devices['data'])):
         deviceid=devices['data'][index]['deviceId']
         print(deviceid)
-        tag_device_url="https://%s/api/v1/appmgr/tags/%s/devices" % (ip,str(tagid))
-        headers = {'x-token-id':token,'content-type': 'application/json'}
-        data = {'devices':[deviceid]}
-        r = requests.post(tag_device_url,data=json.dumps(data),headers=headers,verify=False)
-        print(r.status_code)
+        tag_device(ip, token, deviceid, tag_id):
         
 def delete_token(ip, token):
     url = "https://%s/api/v1/appmgr/tokenservice/%s" % (ip, token)
