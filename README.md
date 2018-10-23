@@ -18,9 +18,10 @@ This fork tries to give to this API a better (and complete) documentation mergin
  - get_devices(ip, token, limit = 10000)
  - delete_all_devices(ip,token, limit=10000)
 ### Applications
+#### LocalApp Endpoint, used to add or upgrade app
  - add_app(ip, token, app_file)
- - get_all_tags(ip,token)
  - get_app_details(ip, token, appname, search_limit=100)
+#### Myapp Endpoint, used to manage lifecycle actions for devices
  - get_myapp_details(ip, token, myapp_name)
  - create_myapp(ip, token, appname)
  - is_myapp_present(ip, token, app_name)
@@ -28,3 +29,5 @@ This fork tries to give to this API a better (and complete) documentation mergin
  - uninstall_app(ip, token, appname, deviceip)
  - stop_app(ip, token, appname)
  - start_app(ip, token, appname)
+### Tags
+ - get_all_tags(ip,token)
