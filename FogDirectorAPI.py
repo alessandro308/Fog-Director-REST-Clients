@@ -203,6 +203,12 @@ def get_devices(ip, token, limit = 10000):
     r=requests.get(url,headers=headers,verify=False)
     return json.loads((json.dumps(r.json())))
 
+def get_device_details(ip, token, deviceip):
+    devices = get_devices(ip, token)
+    for index in range(len(devices['data'])):
+        if(deviceip == devices['data'][index]['ipAddress']):
+            return devices['data'][index]
+
 def delete_all_devices(ip,token, limit=10000):
     devices=get_devices(ip, token)
     for index in range(len(devices['data'])):
@@ -216,15 +222,6 @@ def add_app(ip, token, app_file):
     if  r.status_code != 201:
         raise SystemError(r.raise_for_status())
 
-def is_app_present(ip, token, app_name):
-    url = "https://%s/api/v1/appmgr/myapps?searchByName=%s" % (ip, app_name)
-    headers = {'x-token-id':token,'content-type': 'application/json'}
-    r=requests.get(url,headers=headers,verify=False)
-    if r.text=='{}' :
-        return False
-    else :
-        return True
-
 # Returns all the tags from apps
 def get_all_tags(ip,token):
     url="https://%s/api/v1/appmgr/tags/" % ip
@@ -236,6 +233,81 @@ def get_all_tags(ip,token):
         tag_id=tags['data'][index]['tagId']
         tag_name=tags['data'][index]['name']
         result.append((tag_id, tag_name))
+
+def get_app_details(ip, token, appname, search_limit=100):
+    url = "https://%s/api/v1/appmgr/localapps?limit=%d" % (ip, search_limit)
+    headers = {'x-token-id':token,'content-type': 'application/json'}
+    r=requests.get(url,headers=headers,verify=False)
+    apps=json.loads((json.dumps(r.json())))
+    for index in range(len(apps['data'])):
+        if(appname == apps['data'][index]['name']):
+            return apps['data'][index]    
+    return None	
+
+def get_myapp_details(ip, token, myapp_name):
+    url = "https://%s/api/v1/appmgr/myapps?searchByName=%s" % (ip, myapp_name)
+    headers = {'x-token-id':token,'content-type': 'application/json'}
+    r=requests.get(url,headers=headers,verify=False)
+    return json.loads((json.dumps(r.json())))	
+
+def create_myapp(ip, token, appname):
+    url="https://%s/api/v1/appmgr/myapps" % ip
+    headers = {'x-token-id':token,'content-type': 'application/json'}
+    app_details = get_app_details(ip, token, appname)
+    data = {"appSourceType":"LOCAL_APPSTORE"}
+    data["name"] = appname
+    data["sourceAppName"] = app_details["localAppId"]+":"+app_details["version"]
+    data["version"] = app_details["version"]
+    r = requests.post(url,data=json.dumps(data),headers=headers,verify=False)
+
+def is_myapp_present(ip, token, app_name):
+    url = "https://%s/api/v1/appmgr/myapps?searchByName=%s" % (ip, app_name)
+    headers = {'x-token-id':token,'content-type': 'application/json'}
+    r=requests.get(url,headers=headers,verify=False)
+    if r.text=='{}' :
+        return False
+    else :
+        return True
+
+
+def install_app(ip, token, appname, deviceip, resources=None):
+    if resources==None:
+        resources = {"resources":{"profile":"c1.tiny","cpu":100,"memory":32,"network":[{"interface-name":"eth0","network-name":"iox-bridge0"}]}}
+    myapp_present = is_myapp_present(ip, token, appname)
+    if myapp_present != True :
+        create_myapp(ip, token, appname)
+    myapp_details = get_myapp_details(ip, token, appname)
+    device_details = get_device_details(ip, token, deviceip)
+    url="https://%s/api/v1/appmgr/myapps/%s/action" % (ip, myapp_details['myappId'])
+    headers = {'x-token-id':token,'content-type': 'application/json'}
+    askedResources = resources
+    data = {"deploy":{"config":{},"metricsPollingFrequency":"3600000","startApp":True,"devices":[{"resourceAsk":askedResources}]}}
+    data["deploy"]["devices"][0]["deviceId"] = device_details['deviceId']
+    requests.post(url,data=json.dumps(data),headers=headers,verify=False)
+
+def uninstall_app(ip, token, appname, deviceip):
+    myapp_details = get_myapp_details(ip, token, appname)
+    device_details = get_device_details(ip, token, deviceip)
+    url="https://%s/api/v1/appmgr/myapps/%s/action" % (ip, myapp_details['myappId'])
+    print "url "+url
+    headers = {'x-token-id':token,'content-type': 'application/json'}
+    data = {"undeploy":{"devices":[-1]}}
+    data["undeploy"]["devices"][0] = device_details['deviceId']
+    requests.post(url,data=json.dumps(data),headers=headers,verify=False)
+
+def stop_app(ip, token, appname):
+    myapp_details = get_myapp_details(ip, token, appname)
+    url="https://%s/api/v1/appmgr/myapps/%s/action" % (ip, myapp_details['myappId'])
+    headers = {'x-token-id':token,'content-type': 'application/json'}
+    data = {"stop":{}}
+    requests.post(url,data=json.dumps(data),headers=headers,verify=False)
+
+def start_app(ip, token, appname):
+    myapp_details = get_myapp_details(ip, token, appname)
+    url="https://%s/api/v1/appmgr/myapps/%s/action" % (ip, myapp_details['myappId'])
+    headers = {'x-token-id':token,'content-type': 'application/json'}
+    data = {"start":{}}
+    requests.post(url,data=json.dumps(data),headers=headers,verify=False)
 
 ip = "10.10.20.50"
 token = get_token(ip, "admin", "admin_123")
