@@ -9,15 +9,16 @@ The RESTful API official documentation is [here](https://developer.cisco.com/doc
 This fork tries to give to this API a better (and complete) documentation merging the official documentation with the unknown API found in the examples.
 
 # API
+### Authentication
  - get_token(ip,username,password)
  - delete_token(ip, token)
- - delete_token(ip, token)
+### Managing Devices
  - add_device(ip, token, device_ip, device_user, device_psw, device_port = 8443)
  - delete_device(ip, token, device_id)
  - get_devices(ip, token, limit = 10000)
  - delete_all_devices(ip,token, limit=10000)
+### Applications
  - add_app(ip, token, app_file)
- - is_app_present(ip, token, app_name)
  - get_all_tags(ip,token)
  - get_app_details(ip, token, appname, search_limit=100)
  - get_myapp_details(ip, token, myapp_name)
